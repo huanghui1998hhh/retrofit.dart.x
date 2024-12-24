@@ -189,6 +189,14 @@ class Body {
   final bool nullToAbsent;
 }
 
+@immutable
+class BodyPart {
+  const BodyPart({this.value, this.expand});
+
+  final String? value;
+  final bool? expand;
+}
+
 /// Use this annotation on a service method param when you want to indicate that no body should be
 /// generated for POST/PUT/DELETE requests.
 @immutable
