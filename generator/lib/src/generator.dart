@@ -1695,7 +1695,7 @@ if (T != dynamic &&
         for (final item in bodyPartAnnotations.entries) {
           final expand = item.value.peek('expand')?.boolValue ?? false;
           final fieldName =
-              item.value.peek(_valueVar)?.stringValue ?? item.key.displayName;
+              item.value.peek('value')?.stringValue ?? item.key.displayName;
           if (expand) {
             expandBodyParts.add(item.key);
           } else {
@@ -1847,7 +1847,7 @@ ${bodyName.displayName} == null
       anyNullable |=
           item.key.type.nullabilitySuffix == NullabilitySuffix.question;
       final fieldName =
-          item.value.peek(_valueVar)?.stringValue ?? item.key.displayName;
+          item.value.peek('value')?.stringValue ?? item.key.displayName;
       if (expand) {
         expandBodyParts.add(item.key);
       } else {
