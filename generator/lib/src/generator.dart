@@ -1600,11 +1600,30 @@ if (T != dynamic &&
       return;
     }
 
+    var anyNullable = false;
+
     final preventNullToAbsent =
         _getMethodAnnotationByType(m, retrofit.PreventNullToAbsent);
 
     final annotation = _getAnnotation(m, retrofit.Body);
     final bodyName = annotation?.element;
+
+    final bodyPartAnnotations = _getAnnotations(m, retrofit.BodyPart);
+    final bodyParts = <Expression, Reference>{};
+    final expandBodyParts = <ParameterElement>[];
+    for (final item in bodyPartAnnotations.entries) {
+      final expand = item.value.peek('expand')?.boolValue ?? false;
+      anyNullable |=
+          item.key.type.nullabilitySuffix == NullabilitySuffix.question;
+      final fieldName =
+          item.value.peek('value')?.stringValue ?? item.key.displayName;
+      if (expand) {
+        expandBodyParts.add(item.key);
+      } else {
+        bodyParts[literal(fieldName)] = refer(item.key.displayName);
+      }
+    }
+
     if (bodyName != null) {
       final nullToAbsent =
           annotation!.reader.peek('nullToAbsent')?.boolValue ?? false;
@@ -1614,7 +1633,8 @@ if (T != dynamic &&
         blocks
           ..add(
             declareFinal(dataVar)
-                .assign(literalMap({}, refer('String'), refer('dynamic')))
+                .assign(
+                    literalMap(bodyParts, refer('String'), refer('dynamic')))
                 .statement,
           )
           ..add(
@@ -1689,20 +1709,6 @@ if (T != dynamic &&
       } else if (bodyName.type.element is ClassElement) {
         final ele = bodyName.type.element! as ClassElement;
 
-        final bodyPartAnnotations = _getAnnotations(m, retrofit.BodyPart);
-        final bodyParts = <Expression, Reference>{};
-        final expandBodyParts = <ParameterElement>[];
-        for (final item in bodyPartAnnotations.entries) {
-          final expand = item.value.peek('expand')?.boolValue ?? false;
-          final fieldName =
-              item.value.peek('value')?.stringValue ?? item.key.displayName;
-          if (expand) {
-            expandBodyParts.add(item.key);
-          } else {
-            bodyParts[literal(fieldName)] = refer(item.key.displayName);
-          }
-        }
-
         if (clientAnnotation.parser == retrofit.Parser.MapSerializable) {
           final toMap =
               ele.augmented.lookUpMethod(name: 'toMap', library: ele.library);
@@ -1718,10 +1724,11 @@ if (T != dynamic &&
           } else {
             blocks.add(
               declareFinal(dataVar)
-                  .assign(literalMap({}, refer('String'), refer('dynamic')))
+                  .assign(
+                      literalMap(bodyParts, refer('String'), refer('dynamic')))
                   .statement,
             );
-            for (var item in expandBodyParts) {
+            for (final item in expandBodyParts) {
               _generateParameterElement(item, blocks, dataVar);
             }
             blocks.add(
@@ -1756,7 +1763,8 @@ if (T != dynamic &&
           } else {
             blocks.add(
               declareFinal(dataVar)
-                  .assign(literalMap({}, refer('String'), refer('dynamic')))
+                  .assign(
+                      literalMap(bodyParts, refer('String'), refer('dynamic')))
                   .statement,
             );
 
@@ -1835,24 +1843,6 @@ ${bodyName.displayName} == null
       }
 
       return;
-    }
-
-    var anyNullable = false;
-
-    final bodyPartAnnotations = _getAnnotations(m, retrofit.BodyPart);
-    final bodyParts = <Expression, Reference>{};
-    final expandBodyParts = <ParameterElement>[];
-    for (final item in bodyPartAnnotations.entries) {
-      final expand = item.value.peek('expand')?.boolValue ?? false;
-      anyNullable |=
-          item.key.type.nullabilitySuffix == NullabilitySuffix.question;
-      final fieldName =
-          item.value.peek('value')?.stringValue ?? item.key.displayName;
-      if (expand) {
-        expandBodyParts.add(item.key);
-      } else {
-        bodyParts[literal(fieldName)] = refer(item.key.displayName);
-      }
     }
 
     if (bodyParts.isNotEmpty || expandBodyParts.isNotEmpty) {

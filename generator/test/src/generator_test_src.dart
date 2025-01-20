@@ -807,6 +807,50 @@ abstract class TestObjectBody {
 
 @ShouldGenerate(
   '''
+    final _data = {'menu_id': menuId};
+''',
+  contains: true,
+)
+@RestApi(baseUrl: 'https://httpbin.org/')
+abstract class TestObjectBody1 {
+  @POST('/users')
+  Future<String> createUser(
+    @BodyPart(value: 'menu_id') String menuId,
+  );
+}
+
+@ShouldGenerate(
+  '''
+    final _data = {'menu_id': menuId};
+''',
+  contains: true,
+)
+@RestApi(baseUrl: 'https://httpbin.org/')
+abstract class TestObjectBody2 {
+  @POST('/users')
+  Future<String> createUser({
+    @BodyPart(value: 'menu_id') required String menuId,
+  });
+}
+
+@ShouldGenerate(
+  '''
+    final _data = <String, dynamic>{'role_hash_id': roleHashId};
+    _data.addAll(user.toJson());
+''',
+  contains: true,
+)
+@RestApi(baseUrl: 'https://httpbin.org/')
+abstract class TestObjectBodyPart {
+  @POST('/users')
+  Future<String> createUser(
+    @Body() User user, {
+    @BodyPart(value: 'role_hash_id') required String roleHashId,
+  });
+}
+
+@ShouldGenerate(
+  '''
     final _data = <String, dynamic>{};
     _data.addAll(user?.toJson() ?? <String, dynamic>{});
 ''',
