@@ -131,8 +131,9 @@ class RetrofitGenerator extends GeneratorForAnnotation<retrofit.RestApi> {
     });
 
     final emitter = DartEmitter(useNullSafetySyntax: true);
-    return DartFormatter()
-        .format([_analyzerIgnores, classBuilder.accept(emitter)].join('\n\n'));
+    return DartFormatter(
+      languageVersion: DartFormatter.latestShortStyleLanguageVersion,
+    ).format([_analyzerIgnores, classBuilder.accept(emitter)].join('\n\n'));
   }
 
   Field _buildDioFiled() => Field(
@@ -1751,7 +1752,7 @@ if (T != dynamic &&
                   .assign(refer(bodyName.displayName))
                   .statement,
             );
-          } else if (_missingSerialize(ele.enclosingElement, bodyName.type)) {
+          } else if (_missingSerialize(ele.enclosingElement3, bodyName.type)) {
             log.warning(
                 '${_displayString(bodyName.type)} must provide a `serialize${_displayString(bodyName.type)}()` method which returns a Map.\n'
                 "It is programmer's responsibility to make sure the ${_displayString(bodyName.type)} is properly serialized");
